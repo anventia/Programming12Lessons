@@ -10,7 +10,7 @@ void setup() {
   size(400,400);
   
   // Smoke //
-  num = 15;  // Number of smoke particles
+  num = 60;  // Number of smoke particles
   smoke = new Smoke[num];
   int i = 0;
   while (i < num) {

@@ -1,7 +1,7 @@
 class Smoke {
   // initial variables //
   float x,y, vx,vy, size;
-  int tint;
+  int tint, alpha;
   
   
   // construct //
@@ -11,9 +11,9 @@ class Smoke {
   
   // movement //
   void show() {  // Draws smoke
-    fill(tint);
-    stroke(tint);
-    strokeWeight(1);
+    fill(tint,alpha);
+    stroke(tint, alpha);
+    strokeWeight(0);
     circle(x,y, size);
   }
   
@@ -26,11 +26,12 @@ class Smoke {
   }
   
   void resetParticle() {
-    x = random(260,280);
-    y = 100;
-    vx = random(-0.1,0.1);
-    vy = random(-1,-0.3);
     size = random(10,20);
-    tint = int(random(100,230));
+    x = random(260,280);
+    y = 100+size/2;
+    vx = random(-0.2,0.2);
+    vy = random(-1,-0.3);
+    tint = int(random(70,100));
+    alpha = int(random(50, 100));
   }
 }
