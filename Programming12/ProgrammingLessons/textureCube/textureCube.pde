@@ -7,7 +7,7 @@ void setup() {
   size(800,800, P3D);
   ((PGraphicsOpenGL)g).textureSampling(3);  // Don't blur images when upscaling
   
-  ice = loadImage("ice.png");
+  ice = loadImage("ice.png");  // Textures I made for my Minecraft Resource Pack!
   stone_bricks = loadImage("stone_bricks.png");
 }
 
