@@ -12,8 +12,10 @@ boolean keyA, keyD, keyW, keyS;  // movement
 float camS;  // speed
 float camH;  // height above ground
 float camAngleV, camAngleH;  // Vertical + Horizontal angles
+float fov;
 
 int[][] map;
+boolean keyAlt, keyZ;
 
 PImage stone_bricks, oak_planks, smooth_stone, diamond_ore;
 
@@ -26,7 +28,6 @@ void setup() {
   size(800,600, P3D);
   textureMode(NORMAL);
   ((PGraphicsOpenGL)g).textureSampling(3);  // Don't blur images when upscaling
-  noCursor();
   window = (GLWindow) surface.getNative();
   // ortho();  // wtf
   
@@ -36,27 +37,28 @@ void setup() {
   camS = 10;
   camH = 200;
   camAngleH = PI/2;
+  fov = 90;
   
   map = new int[][] {  // 20x20 map
    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+   {1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1},
+   {1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+   {1,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,1},
+   {1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1},
    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+   {1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+   {0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+   {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+   {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+   {1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,2,0,0,0,1},
+   {1,0,0,1,0,0,1,1,1,0,0,0,0,0,2,2,2,0,0,1},
+   {1,0,0,1,0,0,0,0,1,0,0,0,0,2,2,2,2,0,0,1},
+   {1,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1},
+   {1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1},
    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
   };
   
@@ -150,13 +152,26 @@ void controlCamera() {
   focY = camY + tan(camAngleV)*300;
   focZ = camZ - sin(camAngleH)*300;
   
-  if(focused) {  // (lyndon figured out this method)
-    window.warpPointer(width/2, height/2);  // Keep pointer in center of screen
+  if(focused && !keyAlt) {
+    window.warpPointer(width/2, height/2);  // Keep pointer in center of screen  // (lyndon found this method)
     camAngleH += -(mouseX - width/2)*0.01;  // Measure changes to pointer position
     camAngleV += (mouseY - height/2)*0.01;
-  }
+    noCursor();  // when holding alt, stop moving camera amd show mouse
+  } else cursor(ARROW);
   
   if(camAngleV > PI/2.1) camAngleV = PI/2.1;
   if(camAngleV < -PI/2.1) camAngleV = -PI/2.1;
+  
+  
+  // Zoom //
+  if(keyZ) {
+    frustum(-20,20, -15,15, 100,2000);
+    perspective(radians(fov/5), float(width)/float(height), 10, -1);  
+    //ortho();
+  } else {
+    frustum(-20,20, -15,15, 20,2000);
+    perspective(radians(fov), float(width)/float(height), 10, -1);
+    //perspective();
+  }
   
 }
